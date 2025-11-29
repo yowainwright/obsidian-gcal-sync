@@ -1,0 +1,10 @@
+{
+  "id": "obsidian-gcal-sync",
+  "name": "Google Calendar Sync",
+  "version": "0.0.0",
+  "minAppVersion": "1.5.0",
+  "description": "Bidirectional Google Calendar sync with slash commands for quick event creation and daily event import",
+  "author": "Jeff Wainwright",
+  "authorUrl": "https://github.com/yowainwright",
+  "isDesktopOnly": false
+}
