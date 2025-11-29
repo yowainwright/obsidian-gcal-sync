@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, beforeEach, afterEach } from "bun:test";
 import {
   parseTime,
   parseDate,
@@ -7,6 +7,7 @@ import {
   parseEventCommand,
   buildCalendarEvent,
 } from "../src/commands/create-event";
+import { mockDate, restoreDate } from "./helpers/mock-date";
 
 describe("create-event", () => {
   describe("parseTime", () => {
@@ -45,34 +46,29 @@ describe("create-event", () => {
   });
 
   describe("parseDate", () => {
-    it("parses 'today' to current date", () => {
-      const result = parseDate("today");
-      const today = new Date().toISOString().split("T")[0];
-      expect(result).toBe(today);
+    beforeEach(() => {
+      mockDate("2024-01-15T12:00:00Z");
     });
 
-    it("parses 'tomorrow' to next day", () => {
-      const result = parseDate("tomorrow");
-      const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split("T")[0];
-      expect(result).toBe(tomorrow);
+    afterEach(() => {
+      restoreDate();
+    });
+
+    it("parses 'today'", () => {
+      expect(parseDate("today")).toBe("2024-01-15");
+    });
+
+    it("parses 'tomorrow'", () => {
+      expect(parseDate("tomorrow")).toBe("2024-01-16");
     });
 
     it("returns date string as-is for ISO format", () => {
       expect(parseDate("2024-03-20")).toBe("2024-03-20");
     });
 
-    it("is case insensitive for today", () => {
-      const today = new Date().toISOString().split("T")[0];
-      expect(parseDate("TODAY")).toBe(today);
-    });
-
-    it("is case insensitive for tomorrow", () => {
-      const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split("T")[0];
-      expect(parseDate("Tomorrow")).toBe(tomorrow);
+    it("is case insensitive", () => {
+      expect(parseDate("TODAY")).toBe("2024-01-15");
+      expect(parseDate("Tomorrow")).toBe("2024-01-16");
     });
   });
 
