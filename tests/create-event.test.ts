@@ -6,10 +6,17 @@ import {
   cleanTitle,
   parseEventCommand,
   buildCalendarEvent,
+  createEventFromCommand,
 } from "../src/commands/create-event";
 import { mockDate, restoreDate } from "./helpers/mock-date";
+import { createMockCalendarClient, setupMockFetch } from "./helpers/mock-calendar";
 
 describe("create-event", () => {
+  const originalFetch = globalThis.fetch;
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
   describe("parseTime", () => {
     it("parses 12-hour time with am", () => {
       expect(parseTime("9am")).toBe("09:00");
@@ -208,6 +215,58 @@ describe("create-event", () => {
       const event = buildCalendarEvent(parsed, "UTC", 60);
 
       expect(event.start.dateTime).toContain("T09:00:00");
+    });
+
+    it("handles attendees", () => {
+      const parsed = {
+        title: "Meeting",
+        date: "2024-01-15",
+        time: "10:00",
+        attendees: ["a@test.com", "b@test.com"],
+      };
+      const event = buildCalendarEvent(parsed, "UTC", 60);
+
+      expect(event.attendees).toEqual([
+        { email: "a@test.com" },
+        { email: "b@test.com" },
+      ]);
+    });
+
+    it("handles missing attendees", () => {
+      const parsed = { title: "Solo meeting" };
+      const event = buildCalendarEvent(parsed, "UTC", 60);
+
+      expect(event.attendees).toBeUndefined();
+    });
+  });
+
+  describe("createEventFromCommand", () => {
+    it("returns true on successful creation", async () => {
+      setupMockFetch({
+        insertResult: { data: { id: "new-event-id" } },
+      });
+      const client = createMockCalendarClient();
+      const parsed = {
+        title: "Test Meeting",
+        date: "2024-01-15",
+        time: "14:00",
+      };
+
+      const result = await createEventFromCommand(client, parsed, "UTC", 60);
+
+      expect(result).toBe(true);
+    });
+
+    it("returns false when event creation fails", async () => {
+      setupMockFetch({
+        insertResult: { data: {} },
+      });
+      const client = createMockCalendarClient();
+      const parsed = { title: "Test Meeting" };
+
+      const result = await createEventFromCommand(client, parsed, "UTC", 60);
+
+      expect(result).toBe(false);
     });
   });
 });

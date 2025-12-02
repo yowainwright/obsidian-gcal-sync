@@ -8,11 +8,10 @@ import {
 import { importDailyEvents } from "./sync/import-events";
 import { createAutoCompleteController } from "./sync/auto-complete";
 import { createCalendarClient } from "./calendar-api";
+import { isDailyNote, buildCompletedLine } from "./utils";
 import type { calendar_v3 } from "googleapis";
 
-export const isDailyNote = (path: string, folder: string): boolean => {
-  return path.startsWith(folder);
-};
+export { isDailyNote, buildCompletedLine } from "./utils";
 
 export const getCurrentLine = (editor: Editor): string => {
   const cursor = editor.getCursor();
@@ -22,11 +21,6 @@ export const getCurrentLine = (editor: Editor): string => {
 export const updateCurrentLine = (editor: Editor, newLine: string): void => {
   const cursor = editor.getCursor();
   editor.setLine(cursor.line, newLine);
-};
-
-export const buildCompletedLine = (line: string): string => {
-  const cleaned = line.replace(/\/@cal\s*/i, "").trim();
-  return `- [x] ${cleaned}`;
 };
 
 export default class GCalSyncPlugin extends Plugin {

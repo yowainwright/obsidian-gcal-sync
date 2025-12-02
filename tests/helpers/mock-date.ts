@@ -1,22 +1,53 @@
 const OriginalDate = globalThis.Date;
 
 export const mockDate = (fixedDate: string | Date): void => {
-  const fixed = typeof fixedDate === "string" ? new Date(fixedDate) : fixedDate;
+  const fixed =
+    typeof fixedDate === "string" ? new OriginalDate(fixedDate) : fixedDate;
 
-  globalThis.Date = class extends OriginalDate {
-    constructor(...args: unknown[]) {
-      if (args.length === 0) {
+  class MockDate extends OriginalDate {
+    constructor();
+    constructor(value: number | string);
+    constructor(
+      year: number,
+      month: number,
+      date?: number,
+      hours?: number,
+      minutes?: number,
+      seconds?: number,
+      ms?: number
+    );
+    constructor(
+      yearOrValue?: number | string,
+      month?: number,
+      date?: number,
+      hours?: number,
+      minutes?: number,
+      seconds?: number,
+      ms?: number
+    ) {
+      if (yearOrValue === undefined) {
         super(fixed.getTime());
+      } else if (month === undefined) {
+        super(yearOrValue);
       } else {
-        // @ts-expect-error - spreading args to Date constructor
-        super(...args);
+        super(
+          yearOrValue as number,
+          month,
+          date ?? 1,
+          hours ?? 0,
+          minutes ?? 0,
+          seconds ?? 0,
+          ms ?? 0
+        );
       }
     }
 
     static now(): number {
       return fixed.getTime();
     }
-  } as DateConstructor;
+  }
+
+  globalThis.Date = MockDate as DateConstructor;
 };
 
 export const restoreDate = (): void => {

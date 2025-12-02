@@ -1,30 +1,86 @@
-import { google, calendar_v3 } from "googleapis";
 import type { CalendarEvent, CalendarConfig } from "./types";
 import { PRIMARY_CALENDAR_ID, MS_PER_DAY } from "./constants";
 
-export const createCalendarClient = (
-  config: CalendarConfig
-): calendar_v3.Calendar => {
-  const { clientId, clientSecret, refreshToken } = config;
+const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
+const GOOGLE_CALENDAR_API = "https://www.googleapis.com/calendar/v3";
 
-  const oauth2Client = new google.auth.OAuth2(clientId, clientSecret);
-  const credentials = { refresh_token: refreshToken };
+export interface CalendarClient {
+  getAccessToken: () => Promise<string>;
+  config: CalendarConfig;
+}
 
-  oauth2Client.setCredentials(credentials);
+const refreshAccessToken = async (
+  clientId: string,
+  clientSecret: string,
+  refreshToken: string
+): Promise<string> => {
+  const params = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    refresh_token: refreshToken,
+    grant_type: "refresh_token",
+  });
 
-  return google.calendar({ version: "v3", auth: oauth2Client });
+  const response = await fetch(GOOGLE_TOKEN_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error_description || "Failed to refresh token");
+  }
+
+  return data.access_token;
+};
+
+export const createCalendarClient = (config: CalendarConfig): CalendarClient => {
+  let cachedToken: string | null = null;
+  let tokenExpiry: number = 0;
+
+  const getAccessToken = async (): Promise<string> => {
+    const now = Date.now();
+    const bufferMs = 60000;
+
+    if (cachedToken && now < tokenExpiry - bufferMs) {
+      return cachedToken;
+    }
+
+    const { clientId, clientSecret, refreshToken } = config;
+    cachedToken = await refreshAccessToken(clientId, clientSecret, refreshToken);
+    tokenExpiry = now + 3600000;
+
+    return cachedToken;
+  };
+
+  return { getAccessToken, config };
 };
 
 export const createEvent = async (
-  client: calendar_v3.Calendar,
+  client: CalendarClient,
   event: CalendarEvent
 ): Promise<string | null> => {
-  const calendarId = PRIMARY_CALENDAR_ID;
-  const requestBody = event;
+  const accessToken = await client.getAccessToken();
+  const url = `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(PRIMARY_CALENDAR_ID)}/events`;
 
-  const response = await client.events.insert({ calendarId, requestBody });
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(event),
+  });
 
-  return response.data.id || null;
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error?.message || "Failed to create event");
+  }
+
+  return data.id || null;
 };
 
 export const getStartOfDay = (date: Date): Date => {
@@ -35,8 +91,17 @@ export const getEndOfDay = (startOfDay: Date): Date => {
   return new Date(startOfDay.getTime() + MS_PER_DAY);
 };
 
+interface GoogleEventItem {
+  id?: string;
+  summary?: string;
+  description?: string;
+  start?: { dateTime?: string; date?: string; timeZone?: string };
+  end?: { dateTime?: string; date?: string; timeZone?: string };
+  attendees?: Array<{ email?: string }>;
+}
+
 export const mapEventItem = (
-  item: calendar_v3.Schema$Event,
+  item: GoogleEventItem,
   fallbackTimezone: string
 ): CalendarEvent => {
   const id = item.id || undefined;
@@ -59,30 +124,36 @@ export const mapEventItem = (
 };
 
 export const fetchTodayEvents = async (
-  client: calendar_v3.Calendar,
+  client: CalendarClient,
   timezone: string
 ): Promise<CalendarEvent[]> => {
   const now = new Date();
   const startOfDay = getStartOfDay(now);
   const endOfDay = getEndOfDay(startOfDay);
 
-  const calendarId = PRIMARY_CALENDAR_ID;
-  const timeMin = startOfDay.toISOString();
-  const timeMax = endOfDay.toISOString();
-  const singleEvents = true;
-  const orderBy = "startTime";
-  const timeZone = timezone;
+  const accessToken = await client.getAccessToken();
 
-  const response = await client.events.list({
-    calendarId,
-    timeMin,
-    timeMax,
-    singleEvents,
-    orderBy,
-    timeZone,
+  const params = new URLSearchParams({
+    timeMin: startOfDay.toISOString(),
+    timeMax: endOfDay.toISOString(),
+    singleEvents: "true",
+    orderBy: "startTime",
+    timeZone: timezone,
   });
 
-  const items = response.data.items || [];
+  const url = `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(PRIMARY_CALENDAR_ID)}/events?${params}`;
+
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error?.message || "Failed to fetch events");
+  }
+
+  const items: GoogleEventItem[] = data.items || [];
 
   return items.map((item) => mapEventItem(item, timezone));
 };

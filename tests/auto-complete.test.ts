@@ -1,11 +1,16 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, beforeEach, afterEach } from "bun:test";
 import {
   parseEventTime,
   markLineComplete,
   processLine,
   processFileContent,
+  processFile,
   getTodayFilePath,
+  getTodayFile,
+  createAutoCompleteController,
 } from "../src/sync/auto-complete";
+import { mockDate, restoreDate } from "./helpers/mock-date";
+import { createMockApp, createMockFile } from "./helpers/mock-obsidian";
 
 describe("auto-complete", () => {
   describe("parseEventTime", () => {
@@ -172,18 +177,182 @@ describe("auto-complete", () => {
   });
 
   describe("getTodayFilePath", () => {
+    beforeEach(() => {
+      mockDate("2024-01-15T12:00:00Z");
+    });
+
+    afterEach(() => {
+      restoreDate();
+    });
+
     it("builds correct path", () => {
-      const today = new Date().toISOString().split("T")[0];
       const result = getTodayFilePath("daily");
 
-      expect(result).toBe(`daily/${today}.md`);
+      expect(result).toBe("daily/2024-01-15.md");
     });
 
     it("works with nested folders", () => {
-      const today = new Date().toISOString().split("T")[0];
       const result = getTodayFilePath("notes/journal/daily");
 
-      expect(result).toBe(`notes/journal/daily/${today}.md`);
+      expect(result).toBe("notes/journal/daily/2024-01-15.md");
+    });
+  });
+
+  describe("processFile", () => {
+    beforeEach(() => {
+      mockDate("2024-01-15T15:00:00");
+    });
+
+    afterEach(() => {
+      restoreDate();
+    });
+
+    it("modifies file when content changes", async () => {
+      let modifiedContent = "";
+      const files = new Map([
+        ["daily/2024-01-15.md", "- [ ] 9:00 AM - Meeting"],
+      ]);
+      const app = createMockApp({
+        files,
+        modifyCallback: (_file, content) => {
+          modifiedContent = content;
+        },
+      });
+      const file = createMockFile("daily/2024-01-15.md");
+
+      await processFile(app, file);
+
+      expect(modifiedContent).toBe("- [x] 9:00 AM - Meeting");
+    });
+
+    it("does not modify file when no changes needed", async () => {
+      let wasCalled = false;
+      const files = new Map([["daily/2024-01-15.md", "Just some text"]]);
+      const app = createMockApp({
+        files,
+        modifyCallback: () => {
+          wasCalled = true;
+        },
+      });
+      const file = createMockFile("daily/2024-01-15.md");
+
+      await processFile(app, file);
+
+      expect(wasCalled).toBe(false);
+    });
+  });
+
+  describe("getTodayFile", () => {
+    beforeEach(() => {
+      mockDate("2024-01-15T12:00:00Z");
+    });
+
+    afterEach(() => {
+      restoreDate();
+    });
+
+    it("returns file when it exists", () => {
+      const files = new Map([["daily/2024-01-15.md", "content"]]);
+      const app = createMockApp({ files });
+
+      const result = getTodayFile(app, "daily");
+
+      expect(result).not.toBeNull();
+      expect(result!.path).toBe("daily/2024-01-15.md");
+    });
+
+    it("returns null when file does not exist", () => {
+      const app = createMockApp({ files: new Map() });
+
+      const result = getTodayFile(app, "daily");
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe("createAutoCompleteController", () => {
+    beforeEach(() => {
+      mockDate("2024-01-15T15:00:00");
+    });
+
+    afterEach(() => {
+      restoreDate();
+    });
+
+    it("creates controller with start and stop methods", () => {
+      const app = createMockApp();
+      const config = { dailyNotesFolder: "daily", interval: 60000 };
+
+      const controller = createAutoCompleteController(app, config);
+
+      expect(typeof controller.start).toBe("function");
+      expect(typeof controller.stop).toBe("function");
+    });
+
+    it("processes file on start when file exists", async () => {
+      let modifiedContent = "";
+      const files = new Map([
+        ["daily/2024-01-15.md", "- [ ] 9:00 AM - Meeting"],
+      ]);
+      const app = createMockApp({
+        files,
+        modifyCallback: (_file, content) => {
+          modifiedContent = content;
+        },
+      });
+      const config = { dailyNotesFolder: "daily", interval: 60000 };
+
+      const controller = createAutoCompleteController(app, config);
+      controller.start();
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      controller.stop();
+
+      expect(modifiedContent).toBe("- [x] 9:00 AM - Meeting");
+    });
+
+    it("does nothing when file does not exist", async () => {
+      let wasCalled = false;
+      const app = createMockApp({
+        files: new Map(),
+        modifyCallback: () => {
+          wasCalled = true;
+        },
+      });
+      const config = { dailyNotesFolder: "daily", interval: 60000 };
+
+      const controller = createAutoCompleteController(app, config);
+      controller.start();
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      controller.stop();
+
+      expect(wasCalled).toBe(false);
+    });
+
+    it("stops processing after stop is called", async () => {
+      let callCount = 0;
+      const files = new Map([
+        ["daily/2024-01-15.md", "- [ ] 9:00 AM - Meeting"],
+      ]);
+      const app = createMockApp({
+        files,
+        modifyCallback: () => {
+          callCount++;
+        },
+      });
+      const config = { dailyNotesFolder: "daily", interval: 10 };
+
+      const controller = createAutoCompleteController(app, config);
+      controller.start();
+
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      controller.stop();
+
+      const countAfterStop = callCount;
+      await new Promise((resolve) => setTimeout(resolve, 30));
+
+      expect(callCount).toBe(countAfterStop);
     });
   });
 });

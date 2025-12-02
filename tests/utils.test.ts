@@ -2,9 +2,10 @@ import { describe, expect, it } from "bun:test";
 import {
   isDailyNote,
   buildCompletedLine,
-} from "../src/index";
+  getDefaultTimezone,
+} from "../src/utils";
 
-describe("index", () => {
+describe("utils", () => {
   describe("isDailyNote", () => {
     it("returns true for file in daily folder", () => {
       expect(isDailyNote("daily/2024-01-15.md", "daily")).toBe(true);
@@ -44,6 +45,18 @@ describe("index", () => {
     it("is case insensitive", () => {
       const result = buildCompletedLine("/@CAL Meeting");
       expect(result).toBe("- [x] Meeting");
+    });
+  });
+
+  describe("getDefaultTimezone", () => {
+    it("returns a string", () => {
+      const result = getDefaultTimezone();
+      expect(typeof result).toBe("string");
+    });
+
+    it("returns a valid timezone", () => {
+      const result = getDefaultTimezone();
+      expect(result.length).toBeGreaterThan(0);
     });
   });
 });

@@ -2,10 +2,9 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import type GCalSyncPlugin from "./index";
 import type { GCalSettings } from "./types";
 import { DEFAULT_DURATION_MINUTES } from "./constants";
+import { getDefaultTimezone } from "./utils";
 
-export const getDefaultTimezone = (): string => {
-  return Intl.DateTimeFormat().resolvedOptions().timeZone;
-};
+export { getDefaultTimezone } from "./utils";
 
 export const DEFAULT_SETTINGS: GCalSettings = {
   clientId: "",
@@ -53,6 +52,24 @@ export const createClientSecretSetting = (
         .setValue(plugin.settings.clientSecret)
         .onChange(async (value) => {
           plugin.settings.clientSecret = value;
+          await plugin.saveSettings();
+        })
+    );
+};
+
+export const createRefreshTokenSetting = (
+  containerEl: HTMLElement,
+  plugin: GCalSyncPlugin
+): Setting => {
+  return new Setting(containerEl)
+    .setName("Refresh Token")
+    .setDesc("Google OAuth Refresh Token (run get-google-token script to obtain)")
+    .addText((text) =>
+      text
+        .setPlaceholder("Enter refresh token")
+        .setValue(plugin.settings.refreshToken)
+        .onChange(async (value) => {
+          plugin.settings.refreshToken = value;
           await plugin.saveSettings();
         })
     );
@@ -180,10 +197,22 @@ export class GCalSettingTab extends PluginSettingTab {
 
     containerEl.createEl("h2", { text: "Google Calendar Sync Settings" });
 
+    containerEl.createEl("h3", { text: "Authentication" });
+    const authDesc = containerEl.createEl("p", {
+      cls: "setting-item-description",
+    });
+    authDesc.innerHTML =
+      "Run <code>bun scripts/get-google-token.ts</code> from the plugin folder to get your credentials.";
+
     createClientIdSetting(containerEl, this.plugin);
     createClientSecretSetting(containerEl, this.plugin);
+    createRefreshTokenSetting(containerEl, this.plugin);
+
+    containerEl.createEl("h3", { text: "Daily Notes" });
     createDailyNotesFolderSetting(containerEl, this.plugin);
     createScheduleHeadingSetting(containerEl, this.plugin);
+
+    containerEl.createEl("h3", { text: "Events" });
     createEventFormatSetting(containerEl, this.plugin);
     createAutoImportSetting(containerEl, this.plugin);
     createAutoCompleteSetting(containerEl, this.plugin);
