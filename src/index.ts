@@ -7,9 +7,8 @@ import {
 } from "./commands/create-event";
 import { importDailyEvents } from "./sync/import-events";
 import { createAutoCompleteController } from "./sync/auto-complete";
-import { createCalendarClient } from "./calendar-api";
+import { createCalendarClient, type CalendarClient } from "./calendar-api";
 import { isDailyNote, buildCompletedLine } from "./utils";
-import type { calendar_v3 } from "googleapis";
 
 export { isDailyNote, buildCompletedLine } from "./utils";
 
@@ -25,7 +24,7 @@ export const updateCurrentLine = (editor: Editor, newLine: string): void => {
 
 export default class GCalSyncPlugin extends Plugin {
   settings: GCalSettings = DEFAULT_SETTINGS;
-  calendarClient: calendar_v3.Calendar | null = null;
+  calendarClient: CalendarClient | null = null;
   autoCompleteController: { start: () => void; stop: () => void } | null = null;
 
   async onload() {
