@@ -3,3 +3,16 @@ main.js
 *.log
 .DS_Store
 bun.lockb
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+
+# Build artifacts
+dist/
+*.tsbuildinfo
