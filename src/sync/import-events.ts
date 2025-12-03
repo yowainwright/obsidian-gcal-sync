@@ -1,6 +1,5 @@
-import type { calendar_v3 } from "googleapis";
 import type { App, TFile } from "obsidian";
-import { fetchTodayEvents } from "../calendar-api";
+import { fetchTodayEvents, type CalendarClient } from "../calendar-api";
 import type { CalendarEvent, ImportConfig } from "../types";
 
 export const formatTime = (dateTime: string): string => {
@@ -84,7 +83,7 @@ export const buildNewContent = (
 };
 
 export const importDailyEvents = async (
-  client: calendar_v3.Calendar,
+  client: CalendarClient,
   app: App,
   file: TFile,
   config: ImportConfig,

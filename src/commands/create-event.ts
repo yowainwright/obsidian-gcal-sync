@@ -1,5 +1,4 @@
-import type { calendar_v3 } from "googleapis";
-import { createEvent } from "../calendar-api";
+import { createEvent, type CalendarClient } from "../calendar-api";
 import type { CalendarEvent, ParsedCommand } from "../types";
 import {
   PARAM_PATTERNS,
@@ -115,7 +114,7 @@ export const buildCalendarEvent = (
 };
 
 export const createEventFromCommand = async (
-  client: calendar_v3.Calendar,
+  client: CalendarClient,
   parsed: ParsedCommand,
   timezone: string,
   defaultDuration: number,
