@@ -7,6 +7,7 @@ import {
   parseEventCommand,
   buildCalendarEvent,
   createEventFromCommand,
+  isHelpCommand,
 } from "../src/commands/create-event";
 import { mockDate, restoreDate } from "./helpers/mock-date";
 import {
@@ -106,28 +107,28 @@ describe("create-event", () => {
   });
 
   describe("cleanTitle", () => {
-    it("removes /@cal", () => {
-      expect(cleanTitle("/@cal Meeting")).toBe("Meeting");
+    it("removes /cal", () => {
+      expect(cleanTitle("/cal Meeting")).toBe("Meeting");
     });
 
     it("removes date parameter", () => {
-      expect(cleanTitle("Meeting /@date:today")).toBe("Meeting");
+      expect(cleanTitle("Meeting date:today")).toBe("Meeting");
     });
 
     it("removes time parameter", () => {
-      expect(cleanTitle("Meeting /@time:3pm")).toBe("Meeting");
+      expect(cleanTitle("Meeting time:3pm")).toBe("Meeting");
     });
 
     it("removes duration parameter", () => {
-      expect(cleanTitle("Meeting /@duration:30m")).toBe("Meeting");
+      expect(cleanTitle("Meeting duration:30m")).toBe("Meeting");
     });
 
     it("removes with parameter", () => {
-      expect(cleanTitle("Meeting /@with:john@example.com")).toBe("Meeting");
+      expect(cleanTitle("Meeting with:john@example.com")).toBe("Meeting");
     });
 
     it("removes video parameter", () => {
-      expect(cleanTitle("Meeting /@video:zoom")).toBe("Meeting");
+      expect(cleanTitle("Meeting video:zoom")).toBe("Meeting");
     });
 
     it("removes checkbox prefix", () => {
@@ -136,25 +137,25 @@ describe("create-event", () => {
 
     it("removes all parameters", () => {
       const input =
-        "- [ ] /@cal Team sync /@date:today /@time:3pm /@duration:1h /@with:team@co.com /@video:meet";
+        "- [ ] /cal Team sync date:today time:3pm duration:1h with:team@co.com video:meet";
       expect(cleanTitle(input)).toBe("Team sync");
     });
   });
 
   describe("parseEventCommand", () => {
-    it("returns null for line without /@cal", () => {
+    it("returns null for line without /cal", () => {
       expect(parseEventCommand("Regular task")).toBeNull();
     });
 
-    it("parses line with /@cal only", () => {
-      const result = parseEventCommand("/@cal Meeting");
+    it("parses line with /cal only", () => {
+      const result = parseEventCommand("/cal Meeting");
       expect(result).not.toBeNull();
       expect(result!.title).toBe("Meeting");
     });
 
     it("parses all parameters", () => {
       const input =
-        "/@cal Team standup /@date:today /@time:9am /@duration:30m /@with:team@co.com /@video:zoom";
+        "/cal Team standup date:today time:9am duration:30m with:team@co.com video:zoom";
       const result = parseEventCommand(input);
 
       expect(result).not.toBeNull();
@@ -166,14 +167,14 @@ describe("create-event", () => {
     });
 
     it("parses multiple attendees", () => {
-      const input = "/@cal Meeting /@with:a@co.com,b@co.com,c@co.com";
+      const input = "/cal Meeting with:a@co.com,b@co.com,c@co.com";
       const result = parseEventCommand(input);
 
       expect(result!.attendees).toEqual(["a@co.com", "b@co.com", "c@co.com"]);
     });
 
     it("handles missing optional parameters", () => {
-      const result = parseEventCommand("/@cal Quick sync");
+      const result = parseEventCommand("/cal Quick sync");
 
       expect(result!.title).toBe("Quick sync");
       expect(result!.date).toBeUndefined();
@@ -181,6 +182,32 @@ describe("create-event", () => {
       expect(result!.duration).toBeUndefined();
       expect(result!.attendees).toBeUndefined();
       expect(result!.video).toBeUndefined();
+    });
+  });
+
+  describe("isHelpCommand", () => {
+    it("returns true for /cal help", () => {
+      expect(isHelpCommand("/cal help")).toBe(true);
+    });
+
+    it("returns true for /cal HELP (case insensitive)", () => {
+      expect(isHelpCommand("/cal HELP")).toBe(true);
+    });
+
+    it("returns true for /cal Help", () => {
+      expect(isHelpCommand("/cal Help")).toBe(true);
+    });
+
+    it("returns false for /cal without help", () => {
+      expect(isHelpCommand("/cal Meeting")).toBe(false);
+    });
+
+    it("returns false for help without /cal", () => {
+      expect(isHelpCommand("help")).toBe(false);
+    });
+
+    it("returns false for regular text", () => {
+      expect(isHelpCommand("Regular task")).toBe(false);
     });
   });
 

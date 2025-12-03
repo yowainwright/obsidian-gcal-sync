@@ -210,9 +210,23 @@ export const fetchTodayEvents = async (
   const startOfDay = getStartOfDay(now);
   const endOfDay = getEndOfDay(startOfDay);
 
-  const eventPromises = calendarIds.map((calendarId) =>
-    fetchEventsFromCalendar(client, calendarId, timezone, startOfDay, endOfDay),
-  );
+  const eventPromises = calendarIds.map(async (calendarId) => {
+    try {
+      return await fetchEventsFromCalendar(
+        client,
+        calendarId,
+        timezone,
+        startOfDay,
+        endOfDay,
+      );
+    } catch (error) {
+      console.warn(
+        `[GCal Sync] Failed to fetch from calendar ${calendarId}:`,
+        error,
+      );
+      return [];
+    }
+  });
 
   const results = await Promise.all(eventPromises);
   const allEvents = results.flat();
