@@ -27,6 +27,14 @@ export interface GCalSettings {
   autoCompleteInterval: number;
   defaultDuration: number;
   timezone: string;
+  selectedCalendars: string[];
+}
+
+export interface GoogleCalendarListItem {
+  id: string;
+  summary: string;
+  primary?: boolean;
+  backgroundColor?: string;
 }
 
 export interface ParsedCommand {
@@ -42,6 +50,7 @@ export interface ImportConfig {
   scheduleHeading: string;
   eventFormat: "task" | "bullet";
   timezone: string;
+  selectedCalendars: string[];
 }
 
 export interface AutoCompleteConfig {

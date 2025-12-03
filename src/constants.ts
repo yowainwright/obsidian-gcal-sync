@@ -23,3 +23,10 @@ export const DEFAULT_DURATION_MINUTES = 60;
 export const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export const PRIMARY_CALENDAR_ID = "primary";
+
+export const GOOGLE_OAUTH_SCOPES = ["https://www.googleapis.com/auth/calendar"];
+export const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
+export const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
+export const GOOGLE_CLOUD_CONSOLE_URL =
+  "https://console.cloud.google.com/apis/credentials";
+export const OAUTH_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";

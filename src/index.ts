@@ -47,9 +47,10 @@ export default class GCalSyncPlugin extends Plugin {
 
   async saveSettings() {
     await this.saveData(this.settings);
+    this.initializeCalendarClient();
   }
 
-  private initializeCalendarClient(): void {
+  initializeCalendarClient(): void {
     const { clientId, clientSecret, refreshToken, timezone } = this.settings;
     const hasCredentials = clientId && clientSecret && refreshToken;
 
@@ -133,6 +134,7 @@ export default class GCalSyncPlugin extends Plugin {
       scheduleHeading: this.settings.scheduleHeading,
       eventFormat: this.settings.eventFormat,
       timezone: this.settings.timezone,
+      selectedCalendars: this.settings.selectedCalendars,
     };
 
     await importDailyEvents(this.calendarClient, this.app, activeFile, config);
@@ -150,6 +152,7 @@ export default class GCalSyncPlugin extends Plugin {
       scheduleHeading: this.settings.scheduleHeading,
       eventFormat: this.settings.eventFormat,
       timezone: this.settings.timezone,
+      selectedCalendars: this.settings.selectedCalendars,
     };
 
     await importDailyEvents(this.calendarClient, this.app, file, config);

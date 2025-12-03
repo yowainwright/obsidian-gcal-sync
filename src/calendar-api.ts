@@ -1,5 +1,5 @@
-import type { CalendarEvent, CalendarConfig } from "./types";
-import { PRIMARY_CALENDAR_ID, MS_PER_DAY } from "./constants";
+import type { CalendarEvent, CalendarConfig, GoogleCalendarListItem } from "./types";
+import { MS_PER_DAY } from "./constants";
 
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_CALENDAR_API = "https://www.googleapis.com/calendar/v3";
@@ -58,12 +58,39 @@ export const createCalendarClient = (config: CalendarConfig): CalendarClient => 
   return { getAccessToken, config };
 };
 
+export const fetchCalendarList = async (
+  client: CalendarClient
+): Promise<GoogleCalendarListItem[]> => {
+  const accessToken = await client.getAccessToken();
+  const url = `${GOOGLE_CALENDAR_API}/users/me/calendarList`;
+
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error?.message || "Failed to fetch calendar list");
+  }
+
+  const items = data.items || [];
+
+  return items.map((item: { id?: string; summary?: string; primary?: boolean; backgroundColor?: string }) => ({
+    id: item.id || "",
+    summary: item.summary || "Untitled",
+    primary: item.primary || false,
+    backgroundColor: item.backgroundColor,
+  }));
+};
+
 export const createEvent = async (
   client: CalendarClient,
-  event: CalendarEvent
+  event: CalendarEvent,
+  calendarId = "primary"
 ): Promise<string | null> => {
   const accessToken = await client.getAccessToken();
-  const url = `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(PRIMARY_CALENDAR_ID)}/events`;
+  const url = `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events`;
 
   const response = await fetch(url, {
     method: "POST",
@@ -123,14 +150,13 @@ export const mapEventItem = (
   };
 };
 
-export const fetchTodayEvents = async (
+const fetchEventsFromCalendar = async (
   client: CalendarClient,
-  timezone: string
+  calendarId: string,
+  timezone: string,
+  startOfDay: Date,
+  endOfDay: Date
 ): Promise<CalendarEvent[]> => {
-  const now = new Date();
-  const startOfDay = getStartOfDay(now);
-  const endOfDay = getEndOfDay(startOfDay);
-
   const accessToken = await client.getAccessToken();
 
   const params = new URLSearchParams({
@@ -141,7 +167,7 @@ export const fetchTodayEvents = async (
     timeZone: timezone,
   });
 
-  const url = `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(PRIMARY_CALENDAR_ID)}/events?${params}`;
+  const url = `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events?${params}`;
 
   const response = await fetch(url, {
     headers: { Authorization: `Bearer ${accessToken}` },
@@ -156,4 +182,29 @@ export const fetchTodayEvents = async (
   const items: GoogleEventItem[] = data.items || [];
 
   return items.map((item) => mapEventItem(item, timezone));
+};
+
+export const fetchTodayEvents = async (
+  client: CalendarClient,
+  timezone: string,
+  calendarIds: string[] = ["primary"]
+): Promise<CalendarEvent[]> => {
+  const now = new Date();
+  const startOfDay = getStartOfDay(now);
+  const endOfDay = getEndOfDay(startOfDay);
+
+  const eventPromises = calendarIds.map((calendarId) =>
+    fetchEventsFromCalendar(client, calendarId, timezone, startOfDay, endOfDay)
+  );
+
+  const results = await Promise.all(eventPromises);
+  const allEvents = results.flat();
+
+  const sortedEvents = allEvents.sort((a, b) => {
+    const aTime = new Date(a.start.dateTime).getTime();
+    const bTime = new Date(b.start.dateTime).getTime();
+    return aTime - bTime;
+  });
+
+  return sortedEvents;
 };

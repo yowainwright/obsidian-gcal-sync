@@ -89,7 +89,7 @@ export const importDailyEvents = async (
   file: TFile,
   config: ImportConfig
 ): Promise<void> => {
-  const events = await fetchTodayEvents(client, config.timezone);
+  const events = await fetchTodayEvents(client, config.timezone, config.selectedCalendars);
   const hasEvents = events.length > 0;
 
   if (!hasEvents) return;

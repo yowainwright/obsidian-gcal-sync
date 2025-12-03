@@ -4,8 +4,8 @@
   "description": "Obsidian plugin for bidirectional Google Calendar sync",
   "main": "main.js",
   "scripts": {
-    "dev": "bun build src/index.ts --outfile=main.js --external obsidian --watch",
-    "build": "bun build src/index.ts --outfile=main.js --external obsidian --minify",
+    "dev": "bun build src/index.ts --outfile=main.js --external obsidian --format=cjs --watch",
+    "build": "bun build src/index.ts --outfile=main.js --external obsidian --format=cjs --minify",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint src/",
     "format": "prettier --write .",
