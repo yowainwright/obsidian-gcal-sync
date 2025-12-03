@@ -75,14 +75,14 @@ describe("auto-complete", () => {
         today.getMonth(),
         today.getDate(),
         9,
-        0
+        0,
       );
       const afternoonNow = new Date(
         today.getFullYear(),
         today.getMonth(),
         today.getDate(),
         14,
-        0
+        0,
       );
 
       const line = "- [ ] 9:00 AM - Morning meeting";
@@ -98,7 +98,7 @@ describe("auto-complete", () => {
         today.getMonth(),
         today.getDate(),
         8,
-        0
+        0,
       );
 
       const line = "- [ ] 9:00 AM - Morning meeting";
@@ -132,7 +132,7 @@ describe("auto-complete", () => {
         today.getMonth(),
         today.getDate(),
         10,
-        0
+        0,
       );
 
       const content = `# Schedule
@@ -157,7 +157,7 @@ describe("auto-complete", () => {
         today.getMonth(),
         today.getDate(),
         8,
-        0
+        0,
       );
 
       const content = `# Schedule

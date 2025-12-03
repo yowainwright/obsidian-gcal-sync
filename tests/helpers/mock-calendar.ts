@@ -33,7 +33,7 @@ export interface MockCalendarOptions {
 }
 
 export const createMockCalendarClient = (
-  options: MockCalendarOptions = {}
+  options: MockCalendarOptions = {},
 ): CalendarClient => {
   const config: CalendarConfig = {
     clientId: "mock-client-id",
@@ -53,7 +53,7 @@ export const setupMockFetch = (options: MockCalendarOptions = {}): void => {
 
   globalThis.fetch = async (
     input: RequestInfo | URL,
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<Response> => {
     const url = typeof input === "string" ? input : input.toString();
 
@@ -61,7 +61,7 @@ export const setupMockFetch = (options: MockCalendarOptions = {}): void => {
       if (options.insertError) {
         return new Response(
           JSON.stringify({ error: { message: options.insertError.message } }),
-          { status: 400 }
+          { status: 400 },
         );
       }
       const data = options.insertResult?.data || { id: "mock-event-id" };
@@ -72,7 +72,7 @@ export const setupMockFetch = (options: MockCalendarOptions = {}): void => {
       if (options.listError) {
         return new Response(
           JSON.stringify({ error: { message: options.listError.message } }),
-          { status: 400 }
+          { status: 400 },
         );
       }
       const data = options.listResult?.data || { items: [] };

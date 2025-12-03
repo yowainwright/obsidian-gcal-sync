@@ -14,7 +14,7 @@ export const mockDate = (fixedDate: string | Date): void => {
       hours?: number,
       minutes?: number,
       seconds?: number,
-      ms?: number
+      ms?: number,
     );
     constructor(
       yearOrValue?: number | string,
@@ -23,7 +23,7 @@ export const mockDate = (fixedDate: string | Date): void => {
       hours?: number,
       minutes?: number,
       seconds?: number,
-      ms?: number
+      ms?: number,
     ) {
       if (yearOrValue === undefined) {
         super(fixed.getTime());
@@ -37,7 +37,7 @@ export const mockDate = (fixedDate: string | Date): void => {
           hours ?? 0,
           minutes ?? 0,
           seconds ?? 0,
-          ms ?? 0
+          ms ?? 0,
         );
       }
     }

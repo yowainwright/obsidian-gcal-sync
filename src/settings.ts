@@ -18,7 +18,7 @@ class AuthCodeModal extends Modal {
   constructor(
     app: App,
     plugin: GCalSyncPlugin,
-    onSubmit: (code: string) => void
+    onSubmit: (code: string) => void,
   ) {
     super(app);
     this.plugin = plugin;
@@ -36,7 +36,7 @@ class AuthCodeModal extends Modal {
     new Setting(contentEl).setName("Authorization Code").addText((text) =>
       text.setPlaceholder("Paste code here").onChange((value) => {
         codeValue = value;
-      })
+      }),
     );
 
     new Setting(contentEl).addButton((btn) =>
@@ -50,7 +50,7 @@ class AuthCodeModal extends Modal {
           }
           this.close();
           this.onSubmit(codeValue.trim());
-        })
+        }),
     );
   }
 
@@ -78,7 +78,7 @@ export const DEFAULT_SETTINGS: GCalSettings = {
 
 export const createClientIdSetting = (
   containerEl: HTMLElement,
-  plugin: GCalSyncPlugin
+  plugin: GCalSyncPlugin,
 ): Setting => {
   return new Setting(containerEl)
     .setName("Client ID")
@@ -90,13 +90,13 @@ export const createClientIdSetting = (
         .onChange(async (value) => {
           plugin.settings.clientId = value;
           await plugin.saveSettings();
-        })
+        }),
     );
 };
 
 export const createClientSecretSetting = (
   containerEl: HTMLElement,
-  plugin: GCalSyncPlugin
+  plugin: GCalSyncPlugin,
 ): Setting => {
   return new Setting(containerEl)
     .setName("Client Secret")
@@ -108,13 +108,13 @@ export const createClientSecretSetting = (
         .onChange(async (value) => {
           plugin.settings.clientSecret = value;
           await plugin.saveSettings();
-        })
+        }),
     );
 };
 
 export const createDailyNotesFolderSetting = (
   containerEl: HTMLElement,
-  plugin: GCalSyncPlugin
+  plugin: GCalSyncPlugin,
 ): Setting => {
   return new Setting(containerEl)
     .setName("Daily Notes Folder")
@@ -126,13 +126,13 @@ export const createDailyNotesFolderSetting = (
         .onChange(async (value) => {
           plugin.settings.dailyNotesFolder = value;
           await plugin.saveSettings();
-        })
+        }),
     );
 };
 
 export const createScheduleHeadingSetting = (
   containerEl: HTMLElement,
-  plugin: GCalSyncPlugin
+  plugin: GCalSyncPlugin,
 ): Setting => {
   return new Setting(containerEl)
     .setName("Schedule Heading")
@@ -144,13 +144,13 @@ export const createScheduleHeadingSetting = (
         .onChange(async (value) => {
           plugin.settings.scheduleHeading = value;
           await plugin.saveSettings();
-        })
+        }),
     );
 };
 
 export const createEventFormatSetting = (
   containerEl: HTMLElement,
-  plugin: GCalSyncPlugin
+  plugin: GCalSyncPlugin,
 ): Setting => {
   return new Setting(containerEl)
     .setName("Event Format")
@@ -163,13 +163,13 @@ export const createEventFormatSetting = (
         .onChange(async (value: "task" | "bullet") => {
           plugin.settings.eventFormat = value;
           await plugin.saveSettings();
-        })
+        }),
     );
 };
 
 export const createAutoImportSetting = (
   containerEl: HTMLElement,
-  plugin: GCalSyncPlugin
+  plugin: GCalSyncPlugin,
 ): Setting => {
   return new Setting(containerEl)
     .setName("Auto Import on Open")
@@ -180,13 +180,13 @@ export const createAutoImportSetting = (
         .onChange(async (value) => {
           plugin.settings.autoImportOnOpen = value;
           await plugin.saveSettings();
-        })
+        }),
     );
 };
 
 export const createAutoCompleteSetting = (
   containerEl: HTMLElement,
-  plugin: GCalSyncPlugin
+  plugin: GCalSyncPlugin,
 ): Setting => {
   return new Setting(containerEl)
     .setName("Auto Complete Passed Events")
@@ -197,13 +197,13 @@ export const createAutoCompleteSetting = (
         .onChange(async (value) => {
           plugin.settings.autoCompleteEnabled = value;
           await plugin.saveSettings();
-        })
+        }),
     );
 };
 
 export const createDefaultDurationSetting = (
   containerEl: HTMLElement,
-  plugin: GCalSyncPlugin
+  plugin: GCalSyncPlugin,
 ): Setting => {
   return new Setting(containerEl)
     .setName("Default Duration")
@@ -216,7 +216,7 @@ export const createDefaultDurationSetting = (
           plugin.settings.defaultDuration =
             parseInt(value) || DEFAULT_DURATION_MINUTES;
           await plugin.saveSettings();
-        })
+        }),
     );
 };
 
@@ -248,7 +248,7 @@ export class GCalSettingTab extends PluginSettingTab {
     });
     link.setAttr("target", "_blank");
     authDesc.createEl("p", {
-      text: '2. Create an OAuth 2.0 Client ID (Desktop app type), then enter Client ID and Secret below.',
+      text: "2. Create an OAuth 2.0 Client ID (Desktop app type), then enter Client ID and Secret below.",
     });
 
     createClientIdSetting(containerEl, this.plugin);
@@ -259,12 +259,12 @@ export class GCalSettingTab extends PluginSettingTab {
       .setDesc(
         this.plugin.settings.refreshToken
           ? "Connected. Click to reconnect."
-          : "Click to authorize access to your Google Calendar."
+          : "Click to authorize access to your Google Calendar.",
       )
       .addButton((btn) =>
         btn
           .setButtonText(
-            this.plugin.settings.refreshToken ? "Reconnect" : "Connect"
+            this.plugin.settings.refreshToken ? "Reconnect" : "Connect",
           )
           .setCta()
           .onClick(async () => {
@@ -282,7 +282,7 @@ export class GCalSettingTab extends PluginSettingTab {
                 const refreshToken = await exchangeCodeForTokens(
                   code,
                   clientId,
-                  clientSecret
+                  clientSecret,
                 );
                 this.plugin.settings.refreshToken = refreshToken;
                 await this.plugin.saveSettings();
@@ -292,7 +292,7 @@ export class GCalSettingTab extends PluginSettingTab {
                 new Notice(`Failed to connect: ${err}`);
               }
             }).open();
-          })
+          }),
       );
 
     containerEl.createEl("h3", { text: "Daily Notes" });
@@ -320,17 +320,24 @@ export class GCalSettingTab extends PluginSettingTab {
       return;
     }
 
-    const calendarListEl = containerEl.createEl("div", { cls: "gcal-calendar-list" });
+    const calendarListEl = containerEl.createEl("div", {
+      cls: "gcal-calendar-list",
+    });
 
     new Setting(containerEl)
       .setName("Load Calendars")
       .setDesc("Fetch your available calendars from Google")
       .addButton((btn) =>
-        btn.setButtonText("Load").onClick(() => this.loadCalendars(btn, calendarListEl))
+        btn
+          .setButtonText("Load")
+          .onClick(() => this.loadCalendars(btn, calendarListEl)),
       );
   }
 
-  private async loadCalendars(btn: import("obsidian").ButtonComponent, listEl: HTMLElement): Promise<void> {
+  private async loadCalendars(
+    btn: import("obsidian").ButtonComponent,
+    listEl: HTMLElement,
+  ): Promise<void> {
     if (!this.plugin.calendarClient) {
       new Notice("Not connected to Google Calendar");
       return;
@@ -350,23 +357,33 @@ export class GCalSettingTab extends PluginSettingTab {
     }
   }
 
-  private renderCalendarList(listEl: HTMLElement, calendars: GoogleCalendarListItem[]): void {
+  private renderCalendarList(
+    listEl: HTMLElement,
+    calendars: GoogleCalendarListItem[],
+  ): void {
     listEl.empty();
 
     for (const cal of calendars) {
-      const isSelected = this.plugin.settings.selectedCalendars.includes(cal.id);
+      const isSelected = this.plugin.settings.selectedCalendars.includes(
+        cal.id,
+      );
       const itemEl = listEl.createEl("div", { cls: "gcal-calendar-item" });
 
       const checkbox = itemEl.createEl("input", { type: "checkbox" });
       checkbox.checked = isSelected;
-      checkbox.addEventListener("change", () => this.toggleCalendar(cal.id, checkbox.checked));
+      checkbox.addEventListener("change", () =>
+        this.toggleCalendar(cal.id, checkbox.checked),
+      );
 
       const label = cal.primary ? `${cal.summary} (Primary)` : cal.summary;
       itemEl.createEl("span", { text: label });
     }
   }
 
-  private async toggleCalendar(calendarId: string, isSelected: boolean): Promise<void> {
+  private async toggleCalendar(
+    calendarId: string,
+    isSelected: boolean,
+  ): Promise<void> {
     const selected = new Set(this.plugin.settings.selectedCalendars);
 
     if (isSelected) {

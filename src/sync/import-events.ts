@@ -16,7 +16,7 @@ export const formatTime = (dateTime: string): string => {
 
 export const formatEventLine = (
   event: CalendarEvent,
-  format: "task" | "bullet"
+  format: "task" | "bullet",
 ): string => {
   const time = formatTime(event.start.dateTime);
   const prefix = format === "task" ? "- [ ]" : "-";
@@ -31,7 +31,7 @@ export const getHeadingLevel = (heading: string): number => {
 
 export const findHeadingPosition = (
   content: string,
-  heading: string
+  heading: string,
 ): { start: number; end: number } | null => {
   const lines = content.split("\n");
   const headingLevel = getHeadingLevel(heading);
@@ -68,7 +68,7 @@ export const findHeadingPosition = (
 export const buildNewContent = (
   content: string,
   eventLines: string[],
-  scheduleHeading: string
+  scheduleHeading: string,
 ): string => {
   const lines = content.split("\n");
   const position = findHeadingPosition(content, scheduleHeading);
@@ -87,16 +87,24 @@ export const importDailyEvents = async (
   client: calendar_v3.Calendar,
   app: App,
   file: TFile,
-  config: ImportConfig
+  config: ImportConfig,
 ): Promise<void> => {
-  const events = await fetchTodayEvents(client, config.timezone, config.selectedCalendars);
+  const events = await fetchTodayEvents(
+    client,
+    config.timezone,
+    config.selectedCalendars,
+  );
   const hasEvents = events.length > 0;
 
   if (!hasEvents) return;
 
   const content = await app.vault.read(file);
   const eventLines = events.map((e) => formatEventLine(e, config.eventFormat));
-  const newContent = buildNewContent(content, eventLines, config.scheduleHeading);
+  const newContent = buildNewContent(
+    content,
+    eventLines,
+    config.scheduleHeading,
+  );
 
   await app.vault.modify(file, newContent);
 };

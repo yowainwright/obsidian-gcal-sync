@@ -21,7 +21,7 @@ export const generateAuthUrl = (clientId: string): string => {
 export const exchangeCodeForTokens = async (
   code: string,
   clientId: string,
-  clientSecret: string
+  clientSecret: string,
 ): Promise<string> => {
   const params = new URLSearchParams({
     code,

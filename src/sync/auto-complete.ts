@@ -41,7 +41,7 @@ export const processLine = (line: string, now: Date): string => {
 
 export const processFileContent = (
   content: string,
-  now: Date
+  now: Date,
 ): { content: string; modified: boolean } => {
   const lines = content.split("\n");
 
@@ -87,7 +87,7 @@ export const getTodayFile = (app: App, folder: string): TFile | null => {
 
 export const createAutoCompleteController = (
   app: App,
-  config: AutoCompleteConfig
+  config: AutoCompleteConfig,
 ): { start: () => void; stop: () => void } => {
   let abortController: AbortController | null = null;
 

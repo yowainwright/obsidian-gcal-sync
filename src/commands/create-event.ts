@@ -94,7 +94,7 @@ export const parseEventCommand = (line: string): ParsedCommand | null => {
 export const buildCalendarEvent = (
   parsed: ParsedCommand,
   timezone: string,
-  defaultDuration: number
+  defaultDuration: number,
 ): CalendarEvent => {
   const today = new Date().toISOString().split("T")[0];
   const date = parsed.date || today;
@@ -118,7 +118,7 @@ export const createEventFromCommand = async (
   client: calendar_v3.Calendar,
   parsed: ParsedCommand,
   timezone: string,
-  defaultDuration: number
+  defaultDuration: number,
 ): Promise<boolean> => {
   const event = buildCalendarEvent(parsed, timezone, defaultDuration);
   const id = await createEvent(client, event);
