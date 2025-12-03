@@ -1,9 +1,9 @@
 export const PARAM_PATTERNS = {
-  date: /\/@date:(\S+)/i,
-  time: /\/@time:(\S+)/i,
-  duration: /\/@duration:(\S+)/i,
-  with: /\/@with:(\S+)/i,
-  video: /\/@video:(zoom|meet|teams)/i,
+  date: /\bdate:(\S+)/i,
+  time: /\btime:(\S+)/i,
+  duration: /\bduration:(\S+)/i,
+  with: /\bwith:(\S+)/i,
+  video: /\bvideo:(zoom|meet|teams)/i,
 } as const;
 
 export const TIME_PATTERN = /^(\d{1,2})(?::(\d{2}))?(am|pm)?$/;
@@ -14,7 +14,26 @@ export const CHECKBOX_PATTERN = /^-\s*\[.\]\s*/;
 
 export const TASK_LINE_PATTERN = /^- \[ \] (\d{1,2}:\d{2}\s*(?:AM|PM)?)/i;
 
-export const CAL_COMMAND = "/@cal";
+export const CAL_COMMAND = "/cal";
+
+export const HELP_PATTERN = /\bhelp\b/i;
+
+export const HELP_MESSAGE = `**Google Calendar Sync - Commands**
+
+\`/cal [title] [options]\`
+
+**Options:**
+- \`date:today\` or \`date:tomorrow\` or \`date:2025-01-15\`
+- \`time:9am\` or \`time:14:30\`
+- \`duration:30m\` or \`duration:2h\`
+- \`with:email@example.com\` (comma-separated for multiple)
+- \`video:zoom\` or \`video:meet\` or \`video:teams\`
+
+**Examples:**
+- \`/cal Team standup time:9am duration:15m\`
+- \`/cal Lunch with client date:tomorrow time:12pm\`
+- \`/cal Interview with:candidate@email.com video:zoom\`
+`;
 
 export const DEFAULT_TIME = "09:00";
 

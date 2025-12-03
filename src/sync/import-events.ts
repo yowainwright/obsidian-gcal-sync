@@ -88,22 +88,35 @@ export const importDailyEvents = async (
   file: TFile,
   config: ImportConfig,
 ): Promise<void> => {
-  const events = await fetchTodayEvents(
-    client,
-    config.timezone,
-    config.selectedCalendars,
-  );
-  const hasEvents = events.length > 0;
+  try {
+    console.log(
+      "[GCal Sync] Fetching events for calendars:",
+      config.selectedCalendars,
+    );
+    const events = await fetchTodayEvents(
+      client,
+      config.timezone,
+      config.selectedCalendars,
+    );
+    console.log("[GCal Sync] Found events:", events.length);
 
-  if (!hasEvents) return;
+    if (events.length === 0) return;
 
-  const content = await app.vault.read(file);
-  const eventLines = events.map((e) => formatEventLine(e, config.eventFormat));
-  const newContent = buildNewContent(
-    content,
-    eventLines,
-    config.scheduleHeading,
-  );
+    const content = await app.vault.read(file);
+    const eventLines = events.map((e) =>
+      formatEventLine(e, config.eventFormat),
+    );
+    console.log("[GCal Sync] Formatted event lines:", eventLines);
 
-  await app.vault.modify(file, newContent);
+    const newContent = buildNewContent(
+      content,
+      eventLines,
+      config.scheduleHeading,
+    );
+
+    await app.vault.modify(file, newContent);
+    console.log("[GCal Sync] Successfully updated file");
+  } catch (error) {
+    console.error("[GCal Sync] Error importing events:", error);
+  }
 };
