@@ -15,43 +15,43 @@ import {
 describe("constants", () => {
   describe("PARAM_PATTERNS", () => {
     it("matches date parameter", () => {
-      const match = "/@date:today".match(PARAM_PATTERNS.date);
+      const match = "date:today".match(PARAM_PATTERNS.date);
       expect(match).not.toBeNull();
       expect(match![1]).toBe("today");
     });
 
     it("matches time parameter", () => {
-      const match = "/@time:3pm".match(PARAM_PATTERNS.time);
+      const match = "time:3pm".match(PARAM_PATTERNS.time);
       expect(match).not.toBeNull();
       expect(match![1]).toBe("3pm");
     });
 
     it("matches duration parameter", () => {
-      const match = "/@duration:30m".match(PARAM_PATTERNS.duration);
+      const match = "duration:30m".match(PARAM_PATTERNS.duration);
       expect(match).not.toBeNull();
       expect(match![1]).toBe("30m");
     });
 
     it("matches with parameter", () => {
-      const match = "/@with:john@example.com".match(PARAM_PATTERNS.with);
+      const match = "with:john@example.com".match(PARAM_PATTERNS.with);
       expect(match).not.toBeNull();
       expect(match![1]).toBe("john@example.com");
     });
 
     it("matches video parameter zoom", () => {
-      const match = "/@video:zoom".match(PARAM_PATTERNS.video);
+      const match = "video:zoom".match(PARAM_PATTERNS.video);
       expect(match).not.toBeNull();
       expect(match![1]).toBe("zoom");
     });
 
     it("matches video parameter meet", () => {
-      const match = "/@video:meet".match(PARAM_PATTERNS.video);
+      const match = "video:meet".match(PARAM_PATTERNS.video);
       expect(match).not.toBeNull();
       expect(match![1]).toBe("meet");
     });
 
     it("matches video parameter teams", () => {
-      const match = "/@video:teams".match(PARAM_PATTERNS.video);
+      const match = "video:teams".match(PARAM_PATTERNS.video);
       expect(match).not.toBeNull();
       expect(match![1]).toBe("teams");
     });
@@ -138,7 +138,7 @@ describe("constants", () => {
 
   describe("static constants", () => {
     it("has correct CAL_COMMAND", () => {
-      expect(CAL_COMMAND).toBe("/@cal");
+      expect(CAL_COMMAND).toBe("/cal");
     });
 
     it("has correct DEFAULT_TIME", () => {

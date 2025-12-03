@@ -6,6 +6,7 @@ import {
   DURATION_PATTERN,
   CHECKBOX_PATTERN,
   CAL_COMMAND,
+  HELP_PATTERN,
   DEFAULT_TIME,
   MS_PER_DAY,
 } from "../constants";
@@ -57,7 +58,7 @@ export const parseDuration = (durationStr: string): number => {
 };
 
 export const cleanTitle = (line: string): string => {
-  const withoutCal = line.replace(/\/@cal\s*/i, "");
+  const withoutCal = line.replace(/\/cal\s*/i, "");
   const withoutDate = withoutCal.replace(PARAM_PATTERNS.date, "");
   const withoutTime = withoutDate.replace(PARAM_PATTERNS.time, "");
   const withoutDuration = withoutTime.replace(PARAM_PATTERNS.duration, "");
@@ -66,6 +67,12 @@ export const cleanTitle = (line: string): string => {
   const withoutCheckbox = withoutVideo.replace(CHECKBOX_PATTERN, "");
 
   return withoutCheckbox.trim();
+};
+
+export const isHelpCommand = (line: string): boolean => {
+  const hasCal = line.includes(CAL_COMMAND);
+  const hasHelp = HELP_PATTERN.test(line);
+  return hasCal && hasHelp;
 };
 
 export const parseEventCommand = (line: string): ParsedCommand | null => {

@@ -66,7 +66,7 @@ export const DEFAULT_SETTINGS: GCalSettings = {
   accessToken: "",
   refreshToken: "",
   dailyNotesFolder: "daily",
-  scheduleHeading: "## Schedule",
+  scheduleHeading: "## Calendar",
   eventFormat: "task",
   autoImportOnOpen: true,
   autoCompleteEnabled: true,
@@ -139,7 +139,7 @@ export const createScheduleHeadingSetting = (
     .setDesc("Heading under which to insert events")
     .addText((text) =>
       text
-        .setPlaceholder("## Schedule")
+        .setPlaceholder("## Calendar")
         .setValue(plugin.settings.scheduleHeading)
         .onChange(async (value) => {
           plugin.settings.scheduleHeading = value;
