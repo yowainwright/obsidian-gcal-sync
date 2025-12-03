@@ -9,7 +9,10 @@ import {
   createEventFromCommand,
 } from "../src/commands/create-event";
 import { mockDate, restoreDate } from "./helpers/mock-date";
-import { createMockCalendarClient, setupMockFetch } from "./helpers/mock-calendar";
+import {
+  createMockCalendarClient,
+  setupMockFetch,
+} from "./helpers/mock-calendar";
 
 describe("create-event", () => {
   const originalFetch = globalThis.fetch;

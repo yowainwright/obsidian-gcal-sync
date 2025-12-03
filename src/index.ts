@@ -47,9 +47,10 @@ export default class GCalSyncPlugin extends Plugin {
 
   async saveSettings() {
     await this.saveData(this.settings);
+    this.initializeCalendarClient();
   }
 
-  private initializeCalendarClient(): void {
+  initializeCalendarClient(): void {
     const { clientId, clientSecret, refreshToken, timezone } = this.settings;
     const hasCredentials = clientId && clientSecret && refreshToken;
 
@@ -85,7 +86,7 @@ export default class GCalSyncPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on("file-open", async (file) => {
         await this.handleFileOpen(file);
-      })
+      }),
     );
   }
 
@@ -97,7 +98,10 @@ export default class GCalSyncPlugin extends Plugin {
       dailyNotesFolder: this.settings.dailyNotesFolder,
     };
 
-    this.autoCompleteController = createAutoCompleteController(this.app, config);
+    this.autoCompleteController = createAutoCompleteController(
+      this.app,
+      config,
+    );
     this.autoCompleteController.start();
   }
 
@@ -114,7 +118,7 @@ export default class GCalSyncPlugin extends Plugin {
       this.calendarClient,
       parsed,
       timezone,
-      defaultDuration
+      defaultDuration,
     );
 
     if (success) {
@@ -133,6 +137,7 @@ export default class GCalSyncPlugin extends Plugin {
       scheduleHeading: this.settings.scheduleHeading,
       eventFormat: this.settings.eventFormat,
       timezone: this.settings.timezone,
+      selectedCalendars: this.settings.selectedCalendars,
     };
 
     await importDailyEvents(this.calendarClient, this.app, activeFile, config);
@@ -150,6 +155,7 @@ export default class GCalSyncPlugin extends Plugin {
       scheduleHeading: this.settings.scheduleHeading,
       eventFormat: this.settings.eventFormat,
       timezone: this.settings.timezone,
+      selectedCalendars: this.settings.selectedCalendars,
     };
 
     await importDailyEvents(this.calendarClient, this.app, file, config);

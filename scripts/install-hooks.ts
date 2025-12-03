@@ -60,18 +60,10 @@ const installHooks = (): void => {
   }
 
   let installed = 0;
-  let skipped = 0;
 
   const hookNames = Object.keys(HOOKS) as Array<keyof typeof HOOKS>;
   for (const hookName of hookNames) {
     const hookPath = join(hooksDir, hookName);
-    const hookExists = existsSync(hookPath);
-
-    if (hookExists) {
-      skipped = skipped + 1;
-      continue;
-    }
-
     const hookContent = HOOKS[hookName];
     writeFileSync(hookPath, hookContent, { mode: 0o755 });
     chmodSync(hookPath, 0o755);
@@ -82,11 +74,6 @@ const installHooks = (): void => {
   const hasInstalledHooks = installed > 0;
   if (hasInstalledHooks) {
     console.log(`\n✅ Installed ${installed} git hook(s)`);
-  }
-
-  const hasSkippedHooks = skipped > 0;
-  if (hasSkippedHooks) {
-    console.log(`ℹ️  Skipped ${skipped} existing hook(s)`);
   }
 };
 

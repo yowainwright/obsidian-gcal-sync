@@ -56,7 +56,7 @@ const generateAuthUrl = (clientId: string): string => {
 const exchangeCodeForTokens = async (
   code: string,
   clientId: string,
-  clientSecret: string
+  clientSecret: string,
 ): Promise<{ refresh_token?: string }> => {
   const params = new URLSearchParams({
     code,
@@ -177,25 +177,23 @@ const main = async (): Promise<void> => {
     console.log("  ✓ Authorization successful!");
     console.log("");
     console.log(
-      "┌─ Your Credentials ─────────────────────────────────────────┐"
+      "┌─ Your Credentials ─────────────────────────────────────────┐",
     );
     console.log(
-      "│                                                            │"
+      "│                                                            │",
+    );
+    console.log(`│  Client ID:     ${clientId.substring(0, 40).padEnd(40)}  │`);
+    console.log(
+      `│  Client Secret: ${clientSecret.substring(0, 40).padEnd(40)}  │`,
     );
     console.log(
-      `│  Client ID:     ${clientId.substring(0, 40).padEnd(40)}  │`
+      `│  Refresh Token: ${tokens.refresh_token.substring(0, 40).padEnd(40)}  │`,
     );
     console.log(
-      `│  Client Secret: ${clientSecret.substring(0, 40).padEnd(40)}  │`
+      "│                                                            │",
     );
     console.log(
-      `│  Refresh Token: ${tokens.refresh_token.substring(0, 40).padEnd(40)}  │`
-    );
-    console.log(
-      "│                                                            │"
-    );
-    console.log(
-      "└────────────────────────────────────────────────────────────┘"
+      "└────────────────────────────────────────────────────────────┘",
     );
     console.log("");
     console.log("  Full refresh token (copy this):");
@@ -203,7 +201,7 @@ const main = async (): Promise<void> => {
     console.log(`  ${tokens.refresh_token}`);
     console.log("");
     console.log(
-      box(["Paste these into Obsidian Settings → Google Calendar Sync"], 2)
+      box(["Paste these into Obsidian Settings → Google Calendar Sync"], 2),
     );
     console.log("");
   } catch (err) {

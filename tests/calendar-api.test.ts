@@ -6,7 +6,10 @@ import {
   createEvent,
   fetchTodayEvents,
 } from "../src/calendar-api";
-import { createMockCalendarClient, setupMockFetch } from "./helpers/mock-calendar";
+import {
+  createMockCalendarClient,
+  setupMockFetch,
+} from "./helpers/mock-calendar";
 
 describe("calendar-api", () => {
   const originalFetch = globalThis.fetch;
@@ -60,7 +63,10 @@ describe("calendar-api", () => {
           dateTime: "2024-01-15T15:00:00-05:00",
           timeZone: "America/New_York",
         },
-        attendees: [{ email: "john@example.com" }, { email: "jane@example.com" }],
+        attendees: [
+          { email: "john@example.com" },
+          { email: "jane@example.com" },
+        ],
       };
 
       const result = mapEventItem(item, "UTC");

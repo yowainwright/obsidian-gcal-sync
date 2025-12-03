@@ -1,5 +1,4 @@
-import type { calendar_v3 } from "googleapis";
-import { createEvent } from "../calendar-api";
+import { createEvent, type CalendarClient } from "../calendar-api";
 import type { CalendarEvent, ParsedCommand } from "../types";
 import {
   PARAM_PATTERNS,
@@ -94,7 +93,7 @@ export const parseEventCommand = (line: string): ParsedCommand | null => {
 export const buildCalendarEvent = (
   parsed: ParsedCommand,
   timezone: string,
-  defaultDuration: number
+  defaultDuration: number,
 ): CalendarEvent => {
   const today = new Date().toISOString().split("T")[0];
   const date = parsed.date || today;
@@ -115,10 +114,10 @@ export const buildCalendarEvent = (
 };
 
 export const createEventFromCommand = async (
-  client: calendar_v3.Calendar,
+  client: CalendarClient,
   parsed: ParsedCommand,
   timezone: string,
-  defaultDuration: number
+  defaultDuration: number,
 ): Promise<boolean> => {
   const event = buildCalendarEvent(parsed, timezone, defaultDuration);
   const id = await createEvent(client, event);

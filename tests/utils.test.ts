@@ -17,7 +17,7 @@ describe("utils", () => {
 
     it("handles nested daily folder", () => {
       expect(isDailyNote("journal/daily/2024-01-15.md", "journal/daily")).toBe(
-        true
+        true,
       );
     });
 
