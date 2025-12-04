@@ -8,8 +8,8 @@ Obsidian plugin for bidirectional Google Calendar sync.
 ## Features
 
 - **Import events**: Sync today's Google Calendar events into your daily notes
-- **Create events**: Use `/@cal` syntax to create calendar events from tasks
-- **Auto-complete**: Get suggestions while typing event parameters
+- **Create events**: Use `/cal` syntax to create calendar events from tasks
+- **Help command**: Type `/cal help` to see available options
 
 ## Setup
 
@@ -40,19 +40,31 @@ In Obsidian settings, enter:
 
 ### Creating events
 
-Add a task with the `/@cal` trigger:
+Add a task with the `/cal` command:
 
 ```markdown
-- [ ] /@cal Team standup /@date:today /@time:9am /@duration:30m
+- [ ] /cal Team standup date:today time:9am duration:30m
 ```
 
-Parameters:
+**Parameters:**
 
-- `/@date:` - Date (today, tomorrow, or YYYY-MM-DD)
-- `/@time:` - Time (9am, 14:30, etc.)
-- `/@duration:` - Duration (30m, 1h, etc.)
-- `/@with:` - Attendees (comma-separated emails)
-- `/@video:` - Video call (zoom, meet)
+- `date:` - Date (today, tomorrow, or YYYY-MM-DD)
+- `time:` - Time (9am, 14:30, etc.)
+- `duration:` - Duration (30m, 1h, etc.)
+- `with:` - Attendees (comma-separated emails)
+- `video:` - Video call (zoom, meet, teams)
+
+**Examples:**
+
+```markdown
+/cal Team standup time:9am duration:15m
+/cal Lunch with client date:tomorrow time:12pm
+/cal Interview with:candidate@email.com video:zoom
+```
+
+### Getting help
+
+Type `/cal help` in any note to see available commands and syntax.
 
 ### Importing events
 
